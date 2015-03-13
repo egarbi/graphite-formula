@@ -1,0 +1,11 @@
+graphite:
+  config:
+    relays:
+     - public: true
+       destinations:
+         - foo:21:1
+         - bar:22:2
+     - public: false
+    caches:
+     - foo: bar
+     - foo: bar
