@@ -26,7 +26,7 @@
 
 {%- do default_relay.update({
   'log_listener_connections' : True,
-  'replication': 1,ls -l
+  'replication': 1,
   'relay_method' : 'consistent-hashing',
   'replication_factor' : 1,
   'destinations' : [ '127.0.0.1:2001:1' ],
