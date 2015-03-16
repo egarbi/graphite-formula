@@ -26,6 +26,7 @@
 
 {%- do default_relay.update({
   'log_listener_connections' : True,
+  'replication': 1,ls -l
   'relay_method' : 'consistent-hashing',
   'replication_factor' : 1,
   'destinations' : [ '127.0.0.1:2001:1' ],
@@ -38,5 +39,6 @@
 {%- set graphite = {} %}
 {%- do graphite.update( {
   'caches' : gc.get('caches', default_cache),
-  'relays' : gc.get('relays', default_relay)
+  'relays' : gc.get('relays', default_relay),
+  'install_path' : gc.get('install_path', '/data/graphite')
 }) %}

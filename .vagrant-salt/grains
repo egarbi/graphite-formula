@@ -1,5 +1,6 @@
 graphite:
   config:
+    install_path: /data/graphite
     relays:
      - public: true
        destinations:
