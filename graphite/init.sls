@@ -6,16 +6,17 @@ python-dev:
 python-pip:
   pkg.installed
 
-/data/graphite/conf/carbon.conf:
+cache_config:
   file.managed:
+    - name: /data/graphite/conf/carbon.conf
     - source: salt://graphite/templates/carbon.conf
     - user: root
     - group: root
     - mode: 644
     - template: jinja
     - context:
-        relays: {{ graphite.relays }}
         caches: {{ graphite.caches }}
+        relays: {{ graphite.relays }}
 
 carbon:
   pip.installed:
@@ -26,11 +27,6 @@ carbon:
       - pkg: python-pip
 
 whisper:
-  pip.installed:
-    - require:
-      - pkg: python-pip
-
-graphite-web:
   pip.installed:
     - require:
       - pkg: python-pip
