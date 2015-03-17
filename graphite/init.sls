@@ -6,14 +6,24 @@ python-dev:
 python-pip:
   pkg.installed
 
-cache_config:
+/data/graphite/conf/storage-schemas.conf:
   file.managed:
-    - name: /data/graphite/conf/carbon.conf
+    - source: salt://graphite/templates/storage-schemas.conf
+    - user: root
+    - group: root
+    - mode: 644
+    - template: jinja
+    - makedirs: True
+
+/data/graphite/conf/carbon.conf:
+  file.managed:
+    - name:
     - source: salt://graphite/templates/carbon.conf
     - user: root
     - group: root
     - mode: 644
     - template: jinja
+    - makedirs: True
     - context:
         caches: {{ graphite.caches }}
         relays: {{ graphite.relays }}
@@ -25,11 +35,14 @@ carbon:
       - --install-lib=/data/graphite/lib
     - require:
       - pkg: python-pip
+      - file: /data/graphite/conf/carbon.conf
+      - file: /data/graphite/conf/storage-schemas.conf
 
 whisper:
   pip.installed:
     - require:
       - pkg: python-pip
+      - pip: carbon
 
 https://github.com/graphite-project/ceres/tarball/master:
   pip.installed:
@@ -37,29 +50,55 @@ https://github.com/graphite-project/ceres/tarball/master:
       - pkg: python-pip
 
 {% for cache in graphite.caches %}
-/etc/init/carbon-cache-{{ loop.index }}.conf:
+/etc/init.d/carbon-cache-{{ loop.index }}:
   file.managed:
-    - source: salt://graphite/templates/upstart.conf
+    - source: salt://graphite/templates/init.d
     - user: root
     - group: root
-    - mode: 644
+    - mode: 755
     - template: jinja
+    - require:
+      - pip: carbon
+      - pip: whisper
     - context:
         instance_num: {{ loop.index }}
         install_path: {{ graphite.install_path }}
         type: cache
+
+carbon-cache-{{ loop.index }}:
+  service.running:
+    - enable: True
+    - watch:
+      - file: /data/graphite/conf/carbon.conf
+    - require:
+      - file: /etc/init.d/carbon-cache-{{ loop.index }}
+      - file: /data/graphite/conf/storage-schemas.conf
+      - file: /data/graphite/conf/carbon.conf
 {% endfor %}
 
 {% for relay in graphite.relays %}
-/etc/init/carbon-relay-{{ loop.index }}.conf:
+/etc/init.d/carbon-relay-{{ loop.index }}:
   file.managed:
-    - source: salt://graphite/templates/upstart.conf
+    - source: salt://graphite/templates/init.d
     - user: root
     - group: root
-    - mode: 644
+    - mode: 755
     - template: jinja
+    - require:
+      - pip: carbon
+      - pip: whisper
     - context:
         instance_num: {{ loop.index }}
         install_path: {{ graphite.install_path }}
         type: relay
+
+carbon-relay-{{ loop.index }}:
+  service.running:
+    - enable: True
+    - watch:
+      - file: /data/graphite/conf/carbon.conf
+    - require:
+      - file: /etc/init.d/carbon-relay-{{ loop.index }}
+      - file: /data/graphite/conf/storage-schemas.conf
+      - file: /data/graphite/conf/carbon.conf
 {% endfor %}
