@@ -5,6 +5,17 @@
 
 {%- set default_cache = {} %}
 {%- set default_relay = {} %}
+{%- set force_mine_update = salt['mine.send']('network.ip_addrs') %}
+
+{%- set cluster_name = salt['grains.get']('graphite:cluster_name') %}
+{%- set graphite_host_dict = salt['mine.get']('G@roles:graphite and G@graphite:cluster_name:' + cluster_name + '', 'network.ip_addrs', 'compound') %}
+{%- set graphite_ids = graphite_host_dict.keys() %}
+{%- set graphite_hosts = graphite_host_dict.values() %}
+{%- set destinations = [] %}
+{% for ip_addr in graphite_hosts %}
+{{ destinations.append(ip_addr[0]+':2103:1') }}
+{% endfor %}
+
 
 {%- do default_cache.update({
   'enable_logrotation'       : True,
@@ -29,12 +40,20 @@
   'replication': 1,
   'relay_method' : 'consistent-hashing',
   'replication_factor' : 1,
-  'destinations' : [ '127.0.0.1:2001:1' ],
+  'destinations' : [ '127.0.0.1:2003:1' ],
   'max_datapoints_per_message' : 500,
   'max_queue_size' : 10000,
   'queue_low_watermark_pct' : '0.8',
   'use_flow_control' : True
 }) %}
+
+
+{%- for relay in gc.get('relays', []) %}
+  {%- if relay.get('destinations','None') == 'mine_relays' %}
+    {%- do relay.update({ 'destinations' : destinations}) %}
+  {%- endif %}
+{%- endfor %}
+
 
 {%- set graphite = {} %}
 {%- do graphite.update( {
