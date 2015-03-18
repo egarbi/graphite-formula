@@ -184,7 +184,9 @@ retentions = 60s:1d
 
 To define a storage schema you must provide it in the grain data. Please see the example below. 
 
+
 ```
+
 roles:
   - graphite
 
@@ -196,6 +198,7 @@ graphite:
       [default_1min_for_1day]
       pattern = .*
       retentions = 60s:1d
+      
  ```
  
  To read more about storage schemas for graphite please read the docs [HERE](http://graphite.readthedocs.org/en/latest/config-carbon.html#storage-schemas-conf).
