@@ -102,7 +102,7 @@ This will create a system with two carbon caches and will override the default `
 
 The cache ports are located at `200*`. The line port is the cache number. So cache #1 above would have a line port of `2001`, cache #2 would have a line port of `2002`. 
 
-The pickle port is located at the `cache # + total # of caches`. So `cache #1` pickle port is located at `2003` and `cahce #2` pickle port is located at `2004`
+The pickle port is located at the `cache # + total # of caches`. So `cache #1` pickle port is located at `2003` and `cache #2` pickle port is located at `2004`
 
 
 ## Defining a relay
@@ -120,11 +120,11 @@ graphite:
           - 127.0.0.1:2004:2
 ```
 
-A relay has to have destinations. So in this example we are connecting to the pickle ports of the caches we defined in the last example. We know that their pickle ports are at `2003` and `2004`. We have also overriden the default replication value of 1 to ensure we duplicate stats to the two caches. This is not a practical real world configuration, but demonstrates the ability to create many different relay setups. 
+A relay has to have destinations. So in this example we are connecting to the pickle ports of the caches we defined in the last example. We know that their pickle ports are at `2003` and `2004`. We have also overridden the default replication value of 1 to ensure we duplicate stats to the two caches. This is not a practical real world configuration, but demonstrates the ability to create many different relay setups. 
 
 ### Relay Clusters
 
-To get graphite into a high avaliability setup you may need to setup relays that are cluster aware. This formula allows you to do so. It is assumed that the first relay defined on a server will be public facing. It is also assumed that all graphite nodes in a cluster have the same number of relays, this is how we dynamically figure out the correct pickle port to connect to. **Currently we do not support a cluster where the cluster relay connects directly to a carbon cache. **
+To get graphite into a high availability setup you may need to setup relays that are cluster aware. This formula allows you to do so. It is assumed that the first relay defined on a server will be public facing. It is also assumed that all graphite nodes in a cluster have the same number of relays, this is how we dynamically figure out the correct pickle port to connect to. **Currently we do not support a cluster where the cluster relay connects directly to a carbon cache. **
 
 ***Example:***
 
@@ -145,7 +145,7 @@ graphite:
         destinations: mine_relays
 ```
 
-The result of this configuration is that salt will find all the nodes that have the grain `graphite:cluster_name` set to `test_cluster`. It will harvest those ips and dynamically create the config for `realy #2` to connect to `relay #1` on each of those hosts in the cluster. So if there are three nodes in the cluser at the following ip addresses `['10.0.2.15', '10.0.2.16', '10.0.2.17']`, then the following would be written to the `carbon.conf` file. 
+The result of this configuration is that salt will find all the nodes that have the grain `graphite:cluster_name` set to `test_cluster`. It will harvest those ips and dynamically create the config for `relay #2` to connect to `relay #1` on each of those hosts in the cluster. So if there are three nodes in the cluster at the following ip addresses `['10.0.2.15', '10.0.2.16', '10.0.2.17']`, then the following would be written to the `carbon.conf` file. 
 
 ```
 DESTINATIONS = 10.0.2.15:2103:1, 10.0.2.16:2103:1, 10.0.2.17:2103:1
@@ -161,7 +161,7 @@ The pickle port is located at the `relay # + total # of relays`. So `relay #1` p
 
 ###Storage Schemas
 
-Storage schemas determin how long stats are kept on the graphite instance. If no storage schema is defined in the grains data the default is the following. 
+Storage schemas determine how long stats are kept on the graphite instance. If no storage schema is defined in the grains data the default is the following. 
 
 ```
 # Schema definitions for Whisper files. Entries are scanned in order,
