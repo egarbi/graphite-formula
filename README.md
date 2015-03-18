@@ -193,7 +193,6 @@ graphite:
       [carbon]
       pattern = ^carbon\.
       retentions = 60:90d
-
       [default_1min_for_1day]
       pattern = .*
       retentions = 60s:1d
