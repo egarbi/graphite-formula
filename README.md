@@ -86,15 +86,14 @@ graphite:
 Private meaning that the cache will bind to `127.0.0.1` so it will only be accessible to localhost. If `public: true` then the cache will bind to `0.0.0.0`.
 
 To override default settings for a cache you can do the following. 
-```
-graphite:
-  config:
-    caches:
-      - public: false
-        max_updates_per_second: 1500
-      - public: false
-        max_updates_per_second: 1500
-```
+
+    graphite:
+      config:
+        caches:
+          - public: false
+            max_updates_per_second: 1500
+          - public: false
+            max_updates_per_second: 1500
 
 This will create a system with two carbon caches and will override the default `max_updates_per_second` of 500 and set it to 1500. 
 
