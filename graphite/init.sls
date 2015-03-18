@@ -24,9 +24,7 @@ python-pip:
     - mode: 644
     - template: jinja
     - makedirs: True
-    - context:
-        caches: {{ graphite.caches }}
-        relays: {{ graphite.relays }}
+
 
 carbon:
   pip.installed:

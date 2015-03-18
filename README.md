@@ -1,15 +1,15 @@
 template-formula
 ================
 
-A SaltStack formula that attempts to capture our team's formula design patterns.
+A SaltStack formula that dynamically sets up a graphite server with the number of relays or caches you desire. 
 
 States
 ======
 
-``template``
+``graphite``
 ------------
 
-Provisions the system with the template init.sls state file.
+Provisions the system with graphite caches and relays defined in the grains of the server.
 
 Formula structure
 =================
@@ -38,70 +38,126 @@ Formula structure
 
 ## settings.sls:
 
-We use a special file called 'settings.sls' to define global values for our Salt formulas.
-
-We specifically have our settings.sls files setup to leverage grains, the Pillar, and then a local
-default value. This means that for certain global values we can look for the value in either
-the minion's list of grains, on the Salt master's Pillar or locally from the settings.sls file.
-
-####Pillars might be, but are not limited to: 
-
-* Things we want to keep globally constant 
-	* package versions
-	* install locations
-* For secrets and passwords 
-	* service api keys
-	* root passwords for services like mysql 
-
-####Grains might be, but are not limited to: 
-
-* Machine specific configuration 
-	* JVM heapspace 
-	* Mysql logfile size  
-* For coordination of clusters
-	* Which cluster a machine is part of 
-	* How data should be sharded in a cluster   
-* Metadata
-	* Things we want to be able to query in our infrastructure 
-		
-####When to use a grain or a pillar 
-Since pillars and grains serve different purposes it is important to take some time to consider when to use one or the other. The situations above are a good starting guide, but a general rule of thumb can be established by asking yourself, "Is this thing global and something I want for all my infrastructure?" If the answer is yes, then its a pillar if the answer is no, then the thing is a grain. 
-
-####Should grains override pillars? 
-Only in very special cases should grains override pillars. The two objects have fundamentally different purposes, so we should be diligent to ensure we try to keep to those purposes. If a grain is allowed to override a pillar we break the contract that pillar data keeps our infrastructure consistent. When that contract is broken we then open up the possibility for snowflake infrastructure that can make it harder to troubleshoot issues. 
-
-####Settings.sls example
-The following is an example of a 'settings.sls' file and shows how we use grains, Pillar, and local
-settings.sls values for formula globals:
-
-    {% set p    = salt['pillar.get']('template', {}) %}
-    {% set pc   = p.get('config', {}) %}
-    {% set g    = salt['grains.get']('template', {}) %}
-    {% set gc   = g.get('config', {}) %}
-
-    {%- set template = {} %}
-    {%- do template.update( {
-      'pkg'           : pc.get('pkg', 'apache2'),
-      'service'       : pc.get('service', 'apache2'),
-      'config_file'   : gc.get('config_file', pc.get('config_file', '/etc/apache2/apache2.conf')),
-      }) %}
-
-One thing to note about the above example is that we explicitly call out the configurations we need. The settings.sls should be verbose and best practice is to limit your configuration values to a single value for a single key. There may be special situations where lists and dictionaries are appropriate, but in general the rule of thumb is to keep to a single value for each key in the settings.sls. 
-
-In the above example for the key `pkg` we have `pc.get('pkg','apache2')`, the `get` function is a python dictionary function. The first argument for `get` is the key your are trying to receive from the dictionary, in this case we are looking for the ket `pkg`. The second argument of `get` is a default value to return if the key is not found. So in this settings.sls if the key `pkg` does not exist in `pillar['template']['config']` then we return `apache`. 
-
-Defaults should be defined in all cases where you don't want to force the user to set a value. There may be some very special cases where a good default is impossible to predict and in those cases a user should be forced to define the value. 
-
-####Importing settings.sls from dependent projects
-
-There may be some cases where a pillar and grain data that is defined for one formula may be required by another. In these cases it is best to access the `settings.sls` file directly from that depended formula. For example if I needed the mysql root password to define some users I would add the following to the top of the state file that needed access to the mysql pillar and grain data. 
+Defines the defaults for the settings for graphite caches and relays. Currently the defaults are laid out as follows. 
 
 ```
-{% from "salt://mysql/settings.sls" import mysql with context %}
+default_cache:
+  enable_logrotation: True
+  enable_udp_listener: False
+  user:
+  max_cache_size: inf
+  max_updates_per_second: 500
+  max_creates_per_minute: 50
+  log_listener_connections: True
+  use_insecure_unpickler: False
+  use_flow_control: True
+  log_updates: False
+  log_cache_hits: False
+  log_cache_queue_sorts: True
+  cache_write_strategy: sorted
+  whisper_autoflush: False
+  whisper_fallocate_create: True
+
+default_relay
+  log_listener_connections: True
+  replication: 1
+  relay_method: consistent-hashing
+  destinations:
+    - 127.0.0.1:2003:1
+  max_datapoints_per_message: 500
+  max_queue_size: 10000
+  queue_low_watermark_pct: 0.8
+  use_flow_control: True
 ```
 
-The important thing to note in the above line is `salt://`. This tells the salt minion to access the salt file server to retrieve the `mysql/settings.sls` file. This is a powerful tool because it allows us to test effectively in our vagrant environments, while also being confident that this statement will work equally as well in production environments. 
+These defaults were taken from the carbon.conf.example that is laid down with the package installation. When you define your own relay or cache any setting you choose not to define will be automatically populated with the default above. You can override any of these settings in your relay or cache by defining the value you desire in your grains. Please go to the graphite documentation link [HERE](http://graphite.readthedocs.org/en/latest/config-carbon.html#storage-schemas-conf) to learn more about these settings. 
 
+## Defining a cache
+
+A cache will be defined and laid out in your server grains. For example the following will define a private cache.
+
+```
+graphite:
+  config:
+    caches:
+      - public: false
+```
+
+Private meaning that the cache will bind to `127.0.0.1` so it will only be accessible to localhost. If `public: true` then the cache will bind to `0.0.0.0`.
+
+To override default settings for a cache you can do the following. 
+```
+graphite:
+  config:
+    caches:
+      - public: false
+        max_updates_per_second: 1500
+      - public: false
+        max_updates_per_second: 1500
+```
+
+This will create a system with two carbon caches and will override the default `max_updates_per_second` of 500 and set it to 1500. 
+
+###Ports
+
+The cache ports are located at `200*`. The line port is the cache number. So cache #1 above would have a line port of `2001`, cache #2 would have a line port of `2002`. 
+
+The pickle port is located at the `cache # + total # of caches`. So `cache #1` pickle port is located at `2003` and `cahce #2` pickle port is located at `2004`
+
+
+## Defining a relay
+
+A relay will be defined and laid out in your server grains. For example the following will define a private relay.
+
+```
+graphite:
+  config:
+    relays:
+      - public: true
+        replication: 2
+        destinations:
+          - 127.0.0.1:2003:1
+          - 127.0.0.1:2004:2
+```
+
+A relay has to have destinations. So in this example we are connecting to the pickle ports of the caches we defined in the last example. We know that their pickle ports are at `2003` and `2004`. We have also overriden the default replication value of 1 to ensure we duplicate stats to the two caches. This is not a practical real world configuration, but demonstrates the ability to create many different relay setups. 
+
+### Relay Clusters
+
+To get graphite into a high avaliability setup you may need to setup relays that are cluster aware. This formula allows you to do so. It is assumed that the first relay defined on a server will be public facing. It is also assumed that all graphite nodes in a cluster have the same number of relays, this is how we dynamically figure out the correct pickle port to connect to. **Currently we do not support a cluster where the cluster relay connects directly to a carbon cache. **
+
+***Example:***
+
+```
+roles:
+  - graphite 
+  
+graphite:
+  cluster_name: test_cluster
+  config:
+    relays:
+      - public: true
+        destinations:
+          - 127.0.0.1:2003:1
+          - 127.0.0.1:2004:2
+      - public: true
+        replication: 2
+        destinations: mine_relays
+```
+
+The result of this configuration is that salt will find all the nodes that have the grain `graphite:cluster_name` set to `test_cluster`. It will harvest those ips and dynamically create the config for `realy #2` to connect to `relay #1` on each of those hosts in the cluster. So if there are three nodes in the cluser at the following ip addresses `['10.0.2.15', '10.0.2.16', '10.0.2.17']`, then the following would be written to the `carbon.conf` file. 
+
+```
+DESTINATIONS = 10.0.2.15:2103:1, 10.0.2.16:2103:1, 10.0.2.17:2103:1
+```
+
+It is worth noting that the grain `roles:graphite` must be defined for a node for the `mine_relays` function to work properly. 
+
+###Ports
+
+The relays ports are located at `210*`. The line port is the relay number. So relay #1 above would have a line port of `2101`, relay #2 would have a line port of `2102`. 
+
+The pickle port is located at the `relay # + total # of relays`. So `relay #1` pickle port is located at `2103` and `relay #2` pickle port is located at `2104`
 
 Vagrant testing
 ===============

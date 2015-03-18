@@ -12,9 +12,12 @@
 {%- set graphite_ids = graphite_host_dict.keys() %}
 {%- set graphite_hosts = graphite_host_dict.values() %}
 {%- set destinations = [] %}
-{% for ip_addr in graphite_hosts %}
-{{ destinations.append(ip_addr[0]+':2103:1') }}
-{% endfor %}
+{%- for ip_addr in graphite_hosts %}
+  {%- if 'relays' in gc %}
+    {%- set num_of_relays = gc.get('relays',[])|length + 1 %}
+    {{ destinations.append(ip_addr[0]+':210%s:1'|format(num_of_relays)) }}
+  {%- endif %}
+{%- endfor %}
 
 
 {%- do default_cache.update({
@@ -39,7 +42,6 @@
   'log_listener_connections' : True,
   'replication': 1,
   'relay_method' : 'consistent-hashing',
-  'replication_factor' : 1,
   'destinations' : [ '127.0.0.1:2003:1' ],
   'max_datapoints_per_message' : 500,
   'max_queue_size' : 10000,
