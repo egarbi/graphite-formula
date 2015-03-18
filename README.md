@@ -98,7 +98,7 @@ graphite:
 
 This will create a system with two carbon caches and will override the default `max_updates_per_second` of 500 and set it to 1500. 
 
-###Ports
+####Ports
 
 The cache ports are located at `200*`. The line port is the cache number. So cache #1 above would have a line port of `2001`, cache #2 would have a line port of `2002`. 
 
@@ -122,7 +122,7 @@ graphite:
 
 A relay has to have destinations. So in this example we are connecting to the pickle ports of the caches we defined in the last example. We know that their pickle ports are at `2003` and `2004`. We have also overridden the default replication value of 1 to ensure we duplicate stats to the two caches. This is not a practical real world configuration, but demonstrates the ability to create many different relay setups. 
 
-### Relay Clusters
+#### Relay Clusters
 
 To get graphite into a high availability setup you may need to setup relays that are cluster aware. This formula allows you to do so. It is assumed that the first relay defined on a server will be public facing. It is also assumed that all graphite nodes in a cluster have the same number of relays, this is how we dynamically figure out the correct pickle port to connect to. **Currently we do not support a cluster where the cluster relay connects directly to a carbon cache. **
 
@@ -153,13 +153,13 @@ DESTINATIONS = 10.0.2.15:2103:1, 10.0.2.16:2103:1, 10.0.2.17:2103:1
 
 It is worth noting that the grain `roles:graphite` must be defined for a node for the `mine_relays` function to work properly. 
 
-###Ports
+####Ports
 
 The relays ports are located at `210*`. The line port is the relay number. So relay #1 above would have a line port of `2101`, relay #2 would have a line port of `2102`. 
 
 The pickle port is located at the `relay # + total # of relays`. So `relay #1` pickle port is located at `2103` and `relay #2` pickle port is located at `2104`
 
-###Storage Schemas
+## Storage Schemas
 
 Storage schemas determine how long stats are kept on the graphite instance. If no storage schema is defined in the grains data the default is the following. 
 
