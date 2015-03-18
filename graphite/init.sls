@@ -6,14 +6,23 @@ python-dev:
 python-pip:
   pkg.installed
 
+{% if salt['grains.get']('graphite:config:storage_schemas','None') == 'None' %}
 /data/graphite/conf/storage-schemas.conf:
   file.managed:
-    - source: salt://graphite/templates/storage-schemas.conf
+    - source: salt://graphite/files/storage-schemas.conf
     - user: root
     - group: root
     - mode: 644
-    - template: jinja
     - makedirs: True
+{% else %}
+/data/graphite/conf/storage-schemas.conf:
+  file.managed:
+    - user: root
+    - group: root
+    - mode: 644
+    - makedirs: True
+    - contents_grains: graphite:config:storage_schemas
+{% endif %}
 
 /data/graphite/conf/carbon.conf:
   file.managed:

@@ -159,6 +159,51 @@ The relays ports are located at `210*`. The line port is the relay number. So re
 
 The pickle port is located at the `relay # + total # of relays`. So `relay #1` pickle port is located at `2103` and `relay #2` pickle port is located at `2104`
 
+###Storage Schemas
+
+Storage schemas determin how long stats are kept on the graphite instance. If no storage schema is defined in the grains data the default is the following. 
+
+```
+# Schema definitions for Whisper files. Entries are scanned in order,
+# and first match wins. This file is scanned for changes every 60 seconds.
+#
+#  [name]
+#  pattern = regex
+#  retentions = timePerPoint:timeToStore, timePerPoint:timeToStore, ...
+
+# Carbon's internal metrics. This entry should match what is specified in
+# CARBON_METRIC_PREFIX and CARBON_METRIC_INTERVAL settings
+[carbon]
+pattern = ^carbon\.
+retentions = 60:90d
+
+[default_1min_for_1day]
+pattern = .*
+retentions = 60s:1d
+```
+
+To define a storage schema you must provide it in the grain data. Please see the example below. 
+
+```
+roles:
+  - graphite
+
+graphite:
+    storage_schemas: |
+      [carbon]
+      pattern = ^carbon\.
+      retentions = 60:90d
+
+      [default_1min_for_1day]
+      pattern = .*
+      retentions = 60s:1d
+ ```
+ 
+ To read more about storage schemas for graphite please read the docs [HERE](http://graphite.readthedocs.org/en/latest/config-carbon.html#storage-schemas-conf).
+ 
+
+
+
 Vagrant testing
 ===============
 

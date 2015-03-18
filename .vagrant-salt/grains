@@ -14,7 +14,14 @@ graphite:
      - public: true
        destinations: mine_relays
        replication: 1
-
     caches:
      - public: false
      - public: false
+    storage_schemas: |
+      [carbon]
+      pattern = ^carbon\.
+      retentions = 60:90d
+
+      [default_1min_for_1day]
+      pattern = .*
+      retentions = 60s:1d
