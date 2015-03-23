@@ -59,7 +59,7 @@
 
 {%- set graphite = {} %}
 {%- do graphite.update( {
-  'caches' : gc.get('caches', default_cache),
-  'relays' : gc.get('relays', default_relay),
+  'caches' : gc.get('caches', [default_cache]),
+  'relays' : gc.get('relays', [default_relay]),
   'install_path' : gc.get('install_path', '/data/graphite')
 }) %}
