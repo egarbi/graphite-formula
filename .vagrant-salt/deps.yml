@@ -1,1 +1,2 @@
 repositories:
+  git: ssh://git@stash.itriagehealth.com/salt/git-formula.git

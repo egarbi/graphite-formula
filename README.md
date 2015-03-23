@@ -1,4 +1,4 @@
-template-formula
+graphite-formula
 ================
 
 A SaltStack formula that dynamically sets up a graphite server with the number of relays or caches you desire. 

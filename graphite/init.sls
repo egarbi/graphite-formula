@@ -26,7 +26,6 @@ python-pip:
 
 /data/graphite/conf/carbon.conf:
   file.managed:
-    - name:
     - source: salt://graphite/templates/carbon.conf
     - user: root
     - group: root
@@ -37,6 +36,7 @@ python-pip:
 
 carbon:
   pip.installed:
+    - name: carbon == {{ graphite.carbon_version }}
     - install_options:
       - --prefix=/data/graphite
       - --install-lib=/data/graphite/lib
@@ -45,13 +45,20 @@ carbon:
       - file: /data/graphite/conf/carbon.conf
       - file: /data/graphite/conf/storage-schemas.conf
 
+carbon.egg-info.symlink:
+    file.symlink:
+        - name: /usr/lib/python2.7/dist-packages/carbon-{{ graphite.carbon_version }}-py2.7.egg-info
+        - target: /data/graphite/lib/carbon-{{ graphite.carbon_version }}-py2.7.egg-info
+        - force: true
+
 whisper:
   pip.installed:
+    - name: whisper == {{ graphite.carbon_version }}
     - require:
       - pkg: python-pip
       - pip: carbon
 
-https://github.com/graphite-project/ceres/tarball/master:
+https://github.com/graphite-project/ceres/tarball/master#egg=ceres:
   pip.installed:
     - require:
       - pkg: python-pip

@@ -61,5 +61,6 @@
 {%- do graphite.update( {
   'caches' : gc.get('caches', [default_cache]),
   'relays' : gc.get('relays', [default_relay]),
+  'carbon_version': pc.get('whisper_version', '0.9.13'),
   'install_path' : gc.get('install_path', '/data/graphite')
 }) %}
