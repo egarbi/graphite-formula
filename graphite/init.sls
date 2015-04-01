@@ -7,7 +7,7 @@ python-pip:
   pkg.installed
 
 {% if salt['grains.get']('graphite:config:storage_schemas','None') == 'None' %}
-/data/graphite/conf/storage-schemas.conf:
+{{ graphite.install_path }}/conf/storage-schemas.conf:
   file.managed:
     - source: salt://graphite/files/storage-schemas.conf
     - user: root
@@ -15,7 +15,7 @@ python-pip:
     - mode: 644
     - makedirs: True
 {% else %}
-/data/graphite/conf/storage-schemas.conf:
+{{ graphite.install_path }}/conf/storage-schemas.conf:
   file.managed:
     - user: root
     - group: root
@@ -24,7 +24,7 @@ python-pip:
     - contents_grains: graphite:config:storage_schemas
 {% endif %}
 
-/data/graphite/conf/carbon.conf:
+{{ graphite.install_path }}/conf/carbon.conf:
   file.managed:
     - source: salt://graphite/templates/carbon.conf
     - user: root
@@ -37,17 +37,17 @@ carbon:
   pip.installed:
     - name: carbon == {{ graphite.carbon_version }}
     - install_options:
-      - --prefix=/data/graphite
-      - --install-lib=/data/graphite/lib
+      - --prefix={{ graphite.install_path }}
+      - --install-lib={{ graphite.install_path }}/lib
     - require:
       - pkg: python-pip
-      - file: /data/graphite/conf/carbon.conf
-      - file: /data/graphite/conf/storage-schemas.conf
+      - file: {{ graphite.install_path }}/conf/carbon.conf
+      - file: {{ graphite.install_path }}/conf/storage-schemas.conf
 
 carbon.egg-info.symlink:
     file.symlink:
         - name: /usr/lib/python2.7/dist-packages/carbon-{{ graphite.carbon_version }}-py2.7.egg-info
-        - target: /data/graphite/lib/carbon-{{ graphite.carbon_version }}-py2.7.egg-info
+        - target: {{ graphite.install_path }}/lib/carbon-{{ graphite.carbon_version }}-py2.7.egg-info
         - force: true
 
 whisper:
@@ -82,11 +82,11 @@ carbon-cache-{{ loop.index }}:
   service.running:
     - enable: True
     - watch:
-      - file: /data/graphite/conf/carbon.conf
+      - file: {{ graphite.install_path }}/conf/carbon.conf
     - require:
       - file: /etc/init.d/carbon-cache-{{ loop.index }}
-      - file: /data/graphite/conf/storage-schemas.conf
-      - file: /data/graphite/conf/carbon.conf
+      - file: {{ graphite.install_path }}/conf/storage-schemas.conf
+      - file: {{ graphite.install_path }}/conf/carbon.conf
 {% endfor %}
 
 {% for relay in graphite.relays %}
@@ -109,9 +109,9 @@ carbon-relay-{{ loop.index }}:
   service.running:
     - enable: True
     - watch:
-      - file: /data/graphite/conf/carbon.conf
+      - file: {{ graphite.install_path }}/conf/carbon.conf
     - require:
       - file: /etc/init.d/carbon-relay-{{ loop.index }}
-      - file: /data/graphite/conf/storage-schemas.conf
-      - file: /data/graphite/conf/carbon.conf
+      - file: {{ graphite.install_path }}/conf/storage-schemas.conf
+      - file: {{ graphite.install_path }}/conf/carbon.conf
 {% endfor %}

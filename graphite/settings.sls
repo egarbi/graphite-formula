@@ -12,7 +12,9 @@
 {%- set graphite_ids = graphite_host_dict.keys() %}
 {%- set graphite_hosts = graphite_host_dict.values() %}
 {%- set destinations = [] %}
+{%- set cluster_servers = [] %}
 {%- for ip_addr in graphite_hosts %}
+  {{ cluster_servers.append('"' + ip_addr[0] + ':80' + '"') }}
   {%- if 'relays' in gc %}
     {%- set num_of_relays = gc.get('relays',[])|length + 1 %}
     {{ destinations.append(ip_addr[0]+':210%s:1'|format(num_of_relays)) }}
@@ -61,7 +63,8 @@
 {%- do graphite.update( {
   'caches' : gc.get('caches', [default_cache]),
   'relays' : gc.get('relays', [default_relay]),
-  'carbon_version': pc.get('carbon_version', '0.9.13'),
-  'web_version'   : pc.get('web_version', '0.9.13'),
-  'install_path' : gc.get('install_path', '/data/graphite')
+  'carbon_version'  : pc.get('carbon_version', '0.9.13'),
+  'web_version'     : pc.get('web_version', '0.9.13'),
+  'install_path'    : gc.get('install_path', '/data/graphite'),
+  'cluster_servers' : cluster_servers
 }) %}
