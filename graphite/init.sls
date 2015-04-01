@@ -33,7 +33,6 @@ python-pip:
     - template: jinja
     - makedirs: True
 
-
 carbon:
   pip.installed:
     - name: carbon == {{ graphite.carbon_version }}

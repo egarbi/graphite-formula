@@ -20,17 +20,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.cache.scope = :box
   end
 
-  # Clone any desired formula repos, if available
-  if File.exist?('./.vagrant-salt/deps.rb')
-    Dir.chdir('./.vagrant-salt') do
-      system('./deps.rb')
-    end
+  config.vm.provision :saltdeps do |deps|
+    deps.checkout_path =  "./.vagrant-salt/deps"
+    deps.deps_path     =  "./.vagrant-salt/saltdeps.yml"
   end
 
   # Provision VM with current formula, in masterless mode
   config.vm.provision :salt do |salt|
     salt.minion_config = "./.vagrant-salt/minion"
-    salt.grains_config = "./.vagrant-salt/grains"
     salt.run_highstate = true
     salt.install_type = 'stable'
     salt.colorize = true
