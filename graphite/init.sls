@@ -105,6 +105,26 @@ https://github.com/graphite-project/ceres/tarball/master#egg=ceres:
     - require:
       - pkg: python-pip
 
+{{ graphite.install_path }}/storage:
+  file.directory:
+    - mode: 775
+    - user: www-data
+    - group: carbon
+
+{{ graphite.install_path }}/storage/whisper:
+  file.directory:
+    - user: carbon
+    - group: carbon
+    - recurse:
+      - user
+      - group
+
+{{ graphite.install_path }}/storage/log:
+  file.directory:
+    - user: carbon
+    - group: carbon
+
+
 {% for cache in graphite.caches %}
 /etc/init.d/carbon-cache-{{ loop.index }}:
   file.managed:
@@ -132,30 +152,6 @@ carbon-cache-{{ loop.index }}:
       - file: {{ graphite.install_path }}/conf/carbon.conf
 {% endfor %}
 
-{{ graphite.install_path }}/storage:
-  file.directory:
-    - mode: 775
-    - user: www-data
-    - group: carbon
-
-{{ graphite.install_path }}/storage/whisper:
-  file.directory:
-    - user: carbon
-    - group: carbon
-    - recurse:
-      - user
-      - group
-
-{{ graphite.install_path }}/storage/log:
-  file.directory:
-    - user: carbon
-    - group: carbon
-
-/var/log/carbon:
-  file.directory:
-    - user: carbon
-    - group: carbon
-    - mode: 755
 
 {% for relay in graphite.relays %}
 /etc/init.d/carbon-relay-{{ loop.index }}:

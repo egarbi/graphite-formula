@@ -27,6 +27,8 @@ dependent_packages:
     - require:
       - pkg: apache2
     - require_in:
+      - cmd: init_db
+    - require_in:
       - file: /etc/apache2/sites-enabled/graphite-web.conf
 
 graphite-web:
@@ -88,6 +90,8 @@ init_db:
     - name: python manage.py syncdb --noinput
     - cwd: {{ graphite.install_path }}/webapp/graphite/
     - creates: {{ graphite.install_path }}/storage/graphite.db
+    - require:
+      - pip: graphite-web
 
 {{ graphite.install_path }}/storage/graphite.db:
   file.managed:
