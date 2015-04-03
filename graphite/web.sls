@@ -40,6 +40,14 @@ graphite-web:
     - require:
       - pkg: python-pip
 
+graphite-web.egg-info.symlink:
+    file.symlink:
+        - name: /usr/lib/python2.7/dist-packages/graphite_web-{{ graphite.carbon_version }}-py2.7.egg-info
+        - target: {{ graphite.install_path }}/webapp/graphite_web-{{ graphite.web_version }}-py2.7.egg-info
+        - force: true
+        - require:
+          - pip: graphite-web
+
 {{ graphite.install_path }}/storage/log/webapp:
   file.directory:
     - user: www-data
@@ -52,14 +60,6 @@ graphite-web:
   file.managed:
     - mode: 755
     - source: salt://graphite/files/graphTemplates.conf
-
-graphite-web.egg-info.symlink:
-    file.symlink:
-        - name: /usr/lib/python2.7/dist-packages/graphite_web-{{ graphite.carbon_version }}-py2.7.egg-info
-        - target: {{ graphite.install_path }}/webapp/graphite_web-{{ graphite.web_version }}-py2.7.egg-info
-        - force: true
-        - require:
-          - pip: graphite-web
 
 {{ graphite.install_path }}/webapp/graphite/local_settings.py:
   file.managed:

@@ -15,7 +15,8 @@ packages = %w[
   fontconfig
   gcc
   g++
-  make]
+  make
+  ]
 
 packages.each do | package |
   describe package("#{package}") do
@@ -90,7 +91,8 @@ describe file("/etc/init.d/carbon-cache-1") do
 end
 
 describe file('/data/graphite/storage') do
-  it{ shoud be_directory }
+  it{ should be_directory }
+end
 
 describe file("/etc/init.d/carbon-relay-2") do
   it{ should be_file }
@@ -106,7 +108,8 @@ services= %w[
   carbon-cache-2
   carbon-relay-1
   carbon-relay-2
-  apache2]
+  apache2
+  ]
 
 services.each do | service |
   describe service("#{service}") do
