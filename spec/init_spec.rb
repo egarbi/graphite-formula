@@ -1,7 +1,21 @@
 # for serverspec documentation: http://serverspec.org/
 require_relative 'spec_helper'
 
-packages = ['python-dev','python-pip']
+packages = %w[
+  python-dev
+  python-pip
+  apache2
+  python-dev
+  python-pip
+  libcairo2-dev
+  libffi-dev
+  pkg-config
+  python-dev
+  python-pip
+  fontconfig
+  gcc
+  g++
+  make]
 
 packages.each do | package |
   describe package("#{package}") do
@@ -9,12 +23,31 @@ packages.each do | package |
   end
 end
 
-pip_packages = ['whisper']
+pip_packages = %w[
+  whisper
+  carbon
+  ]
 
 pip_packages.each do | pip_package |
   describe package("#{pip_package}") do
-    it { should be_installed.by('pip') }
+    it { should be_installed.by('pip').with_version('0.9.13') }
   end
+end
+
+describe file("/etc/apache2/sites-enabled/000-default.conf") do
+  it{ should_not be_file }
+end
+
+describe user('carbon') do
+  it { should belong_to_group 'carbon' }
+  it { should have_uid 4000 }
+  it { should have_home_directory '/home/carbon'}
+  it { should have_login_shell '/bin/bash' }
+end
+
+describe group('carbon') do
+  it { should exist }
+  it { should have_gid 4000 }
 end
 
 describe file("/data/graphite/conf/carbon.conf") do
@@ -26,7 +59,6 @@ describe file("/data/graphite/conf/carbon.conf") do
   its(:content) { should match /DESTINATIONS = 127.0.0.1:2003:1, 127.0.0.1:2004:2/ }
   its(:content) { should match /PICKLE_RECEIVER_INTERFACE = 127.0.0.1/ }
 end
-
 describe file("/data/graphite/conf/storage-schemas.conf") do
   it{ should be_file }
   it{ should be_owned_by 'root' }
@@ -57,6 +89,9 @@ describe file("/etc/init.d/carbon-cache-1") do
   its(:content) { should eq IO.read(path) }
 end
 
+describe file('/data/graphite/storage') do
+  it{ shoud be_directory }
+
 describe file("/etc/init.d/carbon-relay-2") do
   it{ should be_file }
   it{ should be_owned_by 'root' }
@@ -66,7 +101,12 @@ describe file("/etc/init.d/carbon-relay-2") do
   its(:content) { should eq IO.read(path) }
 end
 
-services=['carbon-cache-1','carbon-cache-2','carbon-relay-1','carbon-relay-2']
+services= %w[
+  carbon-cache-1
+  carbon-cache-2
+  carbon-relay-1
+  carbon-relay-2
+  apache2]
 
 services.each do | service |
   describe service("#{service}") do

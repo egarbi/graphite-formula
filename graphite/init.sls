@@ -44,9 +44,6 @@ graphite_dependencies:
      - g++
      - make
 
-python-pip:
-  pkg.installed
-
 {% if salt['grains.get']('graphite:config:storage_schemas','None') == 'None' %}
 {{ graphite.install_path }}/conf/storage-schemas.conf:
   file.managed:
