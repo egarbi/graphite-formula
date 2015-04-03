@@ -17,7 +17,7 @@ PIDFILE=/data/graphite/storage/carbon-cache-1.pid
 start() {
     echo "Starting carbon-cache instance 1..."
 
-    /sbin/start-stop-daemon --start --pidfile $PIDFILE --exec $CARBON_CACHE -- --pidfile=$PIDFILE --instance 1 start
+    /sbin/start-stop-daemon --start --chuid carbon:carbon --pidfile $PIDFILE --exec $CARBON_CACHE -- --pidfile=$PIDFILE --instance 1 start
 }
 
 stop() {

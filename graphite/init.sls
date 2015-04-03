@@ -1,5 +1,34 @@
 {% from "graphite/settings.sls" import graphite with context %}
 
+apache2:
+  pkg.installed:
+    - name: apache2
+  service.running:
+    - require:
+      - pkg: apache2
+
+/etc/apache2/sites-enabled/000-default.conf:
+  file.absent:
+    - require:
+      - pkg: apache2
+
+carbon_user_group:
+  group.present:
+    - name: carbon
+    - gid: 4000
+    - system: True
+
+carbon_user:
+  user.present:
+    - name: carbon
+    - shell: /bin/bash
+    - home: /home/carbon
+    - uid: 4000
+    - gid: 4000
+    - groups:
+      - carbon
+      - www-data
+
 graphite_dependencies:
   pkg.installed:
    - names:
@@ -102,6 +131,31 @@ carbon-cache-{{ loop.index }}:
       - file: {{ graphite.install_path }}/conf/storage-schemas.conf
       - file: {{ graphite.install_path }}/conf/carbon.conf
 {% endfor %}
+
+{{ graphite.install_path }}/storage:
+  file.directory:
+    - mode: 775
+    - user: www-data
+    - group: carbon
+
+{{ graphite.install_path }}/storage/whisper:
+  file.directory:
+    - user: carbon
+    - group: carbon
+    - recurse:
+      - user
+      - group
+
+{{ graphite.install_path }}/storage/log:
+  file.directory:
+    - user: carbon
+    - group: carbon
+
+/var/log/carbon:
+  file.directory:
+    - user: carbon
+    - group: carbon
+    - mode: 755
 
 {% for relay in graphite.relays %}
 /etc/init.d/carbon-relay-{{ loop.index }}:

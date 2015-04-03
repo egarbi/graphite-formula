@@ -17,7 +17,7 @@ PIDFILE={{ install_path }}/storage/carbon-{{ type }}-{{ instance_num }}.pid
 start() {
     echo "Starting carbon-{{ type}} instance {{ instance_num }}..."
 
-    /sbin/start-stop-daemon --start --pidfile $PIDFILE --exec $CARBON_{{ type|upper }} -- --pidfile=$PIDFILE --instance {{ instance_num }} start
+    /sbin/start-stop-daemon --start --chuid carbon:carbon --pidfile $PIDFILE --exec $CARBON_{{ type|upper }} -- --pidfile=$PIDFILE --instance {{ instance_num }} start
 }
 
 stop() {

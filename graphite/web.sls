@@ -26,6 +26,8 @@ dependent_packages:
       - python-rrdtool
     - require:
       - pkg: apache2
+    - require_in:
+      - file: /etc/apache2/sites-enabled/graphite-web.conf
 
 graphite-web:
   pip.installed:
@@ -38,11 +40,9 @@ graphite-web:
 
 {{ graphite.install_path }}/storage/log/webapp:
   file.directory:
-    - mode: 775
     - user: www-data
     - group: www-data
     - recurse:
-      - mode
       - user
       - group
 
@@ -73,19 +73,14 @@ graphite-web.egg-info.symlink:
     - require:
       - pip: graphite-web
 
-apache2:
-  pkg.installed:
-    - name: apache2
-  service.running:
-    - require:
-      - pkg: apache2
-
 {% for mod in ['wsgi','socache_shmcb', 'rewrite'] %}
 {{ mod }}:
   apache_module.enable:
     - require:
       - pkg: apache2
       - pkg: libapache2-mod-wsgi
+    - require_in:
+      - file: /etc/apache2/sites-enabled/graphite-web.conf
 {% endfor %}
 
 init_db:
@@ -94,14 +89,6 @@ init_db:
     - cwd: {{ graphite.install_path }}/webapp/graphite/
     - creates: {{ graphite.install_path }}/storage/graphite.db
 
-{{ graphite.install_path }}/storage:
-  file.directory:
-    - user: www-data
-    - group: www-data
-    - mode: 755
-    - require:
-      - cmd: init_db
-
 {{ graphite.install_path }}/storage/graphite.db:
   file.managed:
     - user: www-data
@@ -109,10 +96,8 @@ init_db:
     - mode: 755
     - require:
       - cmd: init_db
-
-
-/etc/apache2/sites-enabled/000-default.conf:
-  file.absent
+    - require_in:
+      - file: /etc/apache2/sites-enabled/graphite-web.conf
 
 /etc/apache2/sites-enabled/graphite-web.conf:
   file.managed:
@@ -121,5 +106,12 @@ init_db:
     - require:
       - apache_module: wsgi
       - file: /etc/apache2/sites-enabled/000-default.conf
+      - file: {{ graphite.install_path }}/conf/graphite.wsgi
+      - file: {{ graphite.install_path }}/webapp/graphite/local_settings.py
+      - file: {{ graphite.install_path }}/conf/graphTemplates.conf
+      - file: {{ graphite.install_path }}/storage/log/webapp
+      - file: {{ graphite.install_path }}/conf
+      - pip: graphite-web
+      - cmd: salt://graphite/templates/web/directory_perms.sh
     - watch_in:
       - service: apache2
