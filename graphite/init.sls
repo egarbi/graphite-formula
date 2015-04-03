@@ -1,7 +1,19 @@
 {% from "graphite/settings.sls" import graphite with context %}
 
-python-dev:
-  pkg.installed
+graphite_dependencies:
+  pkg.installed:
+   - names:
+     - python-dev
+     - python-pip
+     - libcairo2-dev
+     - libffi-dev
+     - pkg-config
+     - python-dev
+     - python-pip
+     - fontconfig
+     - gcc
+     - g++
+     - make
 
 python-pip:
   pkg.installed
@@ -12,14 +24,14 @@ python-pip:
     - source: salt://graphite/files/storage-schemas.conf
     - user: root
     - group: root
-    - mode: 644
+    - mode: 755
     - makedirs: True
 {% else %}
 {{ graphite.install_path }}/conf/storage-schemas.conf:
   file.managed:
     - user: root
     - group: root
-    - mode: 644
+    - mode: 755
     - makedirs: True
     - contents_grains: graphite:config:storage_schemas
 {% endif %}
@@ -29,7 +41,7 @@ python-pip:
     - source: salt://graphite/templates/carbon.conf
     - user: root
     - group: root
-    - mode: 644
+    - mode: 755
     - template: jinja
     - makedirs: True
 
@@ -49,6 +61,8 @@ carbon.egg-info.symlink:
         - name: /usr/lib/python2.7/dist-packages/carbon-{{ graphite.carbon_version }}-py2.7.egg-info
         - target: {{ graphite.install_path }}/lib/carbon-{{ graphite.carbon_version }}-py2.7.egg-info
         - force: true
+        - require:
+          - pip: carbon
 
 whisper:
   pip.installed:

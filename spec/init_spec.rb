@@ -21,7 +21,7 @@ describe file("/data/graphite/conf/carbon.conf") do
   it{ should be_file }
   it{ should be_owned_by 'root' }
   it{ should be_grouped_into 'root' }
-  it{ should be_mode 644}
+  it{ should be_mode 755}
   its(:content) { should match /DESTINATIONS = 10.0.2.15:2103:1/ }
   its(:content) { should match /DESTINATIONS = 127.0.0.1:2003:1, 127.0.0.1:2004:2/ }
   its(:content) { should match /PICKLE_RECEIVER_INTERFACE = 127.0.0.1/ }
@@ -31,7 +31,7 @@ describe file("/data/graphite/conf/storage-schemas.conf") do
   it{ should be_file }
   it{ should be_owned_by 'root' }
   it{ should be_grouped_into 'root' }
-  it{ should be_mode 644}
+  it{ should be_mode 755}
 end
 
 describe file("/data/graphite/bin/carbon-relay.py") do

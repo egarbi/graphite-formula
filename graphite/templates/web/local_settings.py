@@ -11,12 +11,12 @@
 # install. This key is used for salting of hashes used in auth tokens,
 # CRSF middleware, cookie storage, etc. This should be set identically among
 # instances if used behind a load balancer.
-#SECRET_KEY = 'UNSAFE_DEFAULT'
+SECRET_KEY = 'asdfasdfae23452134'
 
 # In Django 1.5+ set this to the list of hosts your graphite instances is
 # accessible as. See:
 # https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-ALLOWED_HOSTS
-#ALLOWED_HOSTS = [ '*' ]
+ALLOWED_HOSTS = [ '*' ]
 
 # Set your local timezone (Django's default is America/Chicago)
 # If your graphs appear to be offset by a couple hours then this probably
@@ -32,7 +32,7 @@ TIME_ZONE = 'America/Denver'
 #LOG_METRIC_ACCESS = True
 
 # Enable full debug page display on exceptions (Internal Server Error pages)
-#DEBUG = True
+DEBUG = True
 
 # If using RRD files and rrdcached, set to the address or socket of the daemon
 #FLUSHRRDCACHED = 'unix:/var/run/rrdcached.sock'
