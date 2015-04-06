@@ -2,20 +2,11 @@
 require_relative 'spec_helper'
 
 packages = %w[
-  python-dev
-  python-pip
   apache2
-  python-dev
-  python-pip
   libcairo2-dev
   libffi-dev
-  pkg-config
   python-dev
   python-pip
-  fontconfig
-  gcc
-  g++
-  make
   ]
 
 packages.each do | package |
