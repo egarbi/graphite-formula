@@ -7,7 +7,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|s
   config.vm.box = "ubuntu/trusty64"
   config.vm.synced_folder "./.vagrant-salt", "/srv/salt", id: "vagrant-root"
-  config.vm.network "forwarded_port", guest: 80, host: 8080sss
+  config.vm.network "forwarded_port", guest: 80, host: 8080
 
   config.ssh.forward_agent = true
 
