@@ -4,11 +4,10 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|s
   config.vm.box = "ubuntu/trusty64"
   config.vm.synced_folder "./.vagrant-salt", "/srv/salt", id: "vagrant-root"
-  config.vm.network "forwarded_port", guest: 80, host: 8080
-  config.vm.network "forwarded_port", guest: 8000, host: 8081
+  config.vm.network "forwarded_port", guest: 80, host: 8080sss
 
   config.ssh.forward_agent = true
 
