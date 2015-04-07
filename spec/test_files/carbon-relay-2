@@ -17,7 +17,7 @@ PIDFILE=/data/graphite/storage/carbon-relay-2.pid
 start() {
     echo "Starting carbon-relay instance 2..."
 
-    /sbin/start-stop-daemon --start --pidfile $PIDFILE --exec $CARBON_RELAY -- --pidfile=$PIDFILE --instance 2 start
+    /sbin/start-stop-daemon --start --chuid carbon:carbon --pidfile $PIDFILE --exec $CARBON_RELAY -- --pidfile=$PIDFILE --instance 2 start
 }
 
 stop() {

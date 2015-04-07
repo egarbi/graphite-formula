@@ -1,55 +1,94 @@
 {% from "graphite/settings.sls" import graphite with context %}
 
-python-dev:
-  pkg.installed
+apache2:
+  pkg.installed:
+    - name: apache2
+  service.running:
+    - require:
+      - pkg: apache2
 
-python-pip:
-  pkg.installed
+/etc/apache2/sites-enabled/000-default.conf:
+  file.absent:
+    - require:
+      - pkg: apache2
+
+carbon_user_group:
+  group.present:
+    - name: carbon
+    - gid: 4000
+    - system: True
+
+carbon_user:
+  user.present:
+    - name: carbon
+    - shell: /bin/bash
+    - home: /home/carbon
+    - uid: 4000
+    - gid: 4000
+    - groups:
+      - carbon
+      - www-data
+
+graphite_dependencies:
+  pkg.installed:
+   - names:
+     - python-dev
+     - python-pip
+     - libcairo2-dev
+     - libffi-dev
+     - pkg-config
+     - python-dev
+     - python-pip
+     - fontconfig
+     - gcc
+     - g++
+     - make
 
 {% if salt['grains.get']('graphite:config:storage_schemas','None') == 'None' %}
-/data/graphite/conf/storage-schemas.conf:
+{{ graphite.install_path }}/conf/storage-schemas.conf:
   file.managed:
     - source: salt://graphite/files/storage-schemas.conf
     - user: root
     - group: root
-    - mode: 644
+    - mode: 755
     - makedirs: True
 {% else %}
-/data/graphite/conf/storage-schemas.conf:
+{{ graphite.install_path }}/conf/storage-schemas.conf:
   file.managed:
     - user: root
     - group: root
-    - mode: 644
+    - mode: 755
     - makedirs: True
     - contents_grains: graphite:config:storage_schemas
 {% endif %}
 
-/data/graphite/conf/carbon.conf:
+{{ graphite.install_path }}/conf/carbon.conf:
   file.managed:
     - source: salt://graphite/templates/carbon.conf
     - user: root
     - group: root
-    - mode: 644
+    - mode: 755
     - template: jinja
     - makedirs: True
-
 
 carbon:
   pip.installed:
     - name: carbon == {{ graphite.carbon_version }}
     - install_options:
-      - --prefix=/data/graphite
-      - --install-lib=/data/graphite/lib
+      - --prefix={{ graphite.install_path }}
+      - --install-lib={{ graphite.install_path }}/lib
     - require:
       - pkg: python-pip
-      - file: /data/graphite/conf/carbon.conf
-      - file: /data/graphite/conf/storage-schemas.conf
+      - file: {{ graphite.install_path }}/conf/carbon.conf
+      - file: {{ graphite.install_path }}/conf/storage-schemas.conf
 
 carbon.egg-info.symlink:
     file.symlink:
         - name: /usr/lib/python2.7/dist-packages/carbon-{{ graphite.carbon_version }}-py2.7.egg-info
-        - target: /data/graphite/lib/carbon-{{ graphite.carbon_version }}-py2.7.egg-info
+        - target: {{ graphite.install_path }}/lib/carbon-{{ graphite.carbon_version }}-py2.7.egg-info
         - force: true
+        - require:
+          - pip: carbon
 
 whisper:
   pip.installed:
@@ -62,6 +101,26 @@ https://github.com/graphite-project/ceres/tarball/master#egg=ceres:
   pip.installed:
     - require:
       - pkg: python-pip
+
+{{ graphite.install_path }}/storage:
+  file.directory:
+    - mode: 775
+    - user: www-data
+    - group: carbon
+
+{{ graphite.install_path }}/storage/whisper:
+  file.directory:
+    - user: carbon
+    - group: carbon
+    - recurse:
+      - user
+      - group
+
+{{ graphite.install_path }}/storage/log:
+  file.directory:
+    - user: carbon
+    - group: carbon
+
 
 {% for cache in graphite.caches %}
 /etc/init.d/carbon-cache-{{ loop.index }}:
@@ -83,12 +142,13 @@ carbon-cache-{{ loop.index }}:
   service.running:
     - enable: True
     - watch:
-      - file: /data/graphite/conf/carbon.conf
+      - file: {{ graphite.install_path }}/conf/carbon.conf
     - require:
       - file: /etc/init.d/carbon-cache-{{ loop.index }}
-      - file: /data/graphite/conf/storage-schemas.conf
-      - file: /data/graphite/conf/carbon.conf
+      - file: {{ graphite.install_path }}/conf/storage-schemas.conf
+      - file: {{ graphite.install_path }}/conf/carbon.conf
 {% endfor %}
+
 
 {% for relay in graphite.relays %}
 /etc/init.d/carbon-relay-{{ loop.index }}:
@@ -110,9 +170,9 @@ carbon-relay-{{ loop.index }}:
   service.running:
     - enable: True
     - watch:
-      - file: /data/graphite/conf/carbon.conf
+      - file: {{ graphite.install_path }}/conf/carbon.conf
     - require:
       - file: /etc/init.d/carbon-relay-{{ loop.index }}
-      - file: /data/graphite/conf/storage-schemas.conf
-      - file: /data/graphite/conf/carbon.conf
+      - file: {{ graphite.install_path }}/conf/storage-schemas.conf
+      - file: {{ graphite.install_path }}/conf/carbon.conf
 {% endfor %}

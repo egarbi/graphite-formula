@@ -7,6 +7,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "ubuntu/trusty64"
   config.vm.synced_folder "./.vagrant-salt", "/srv/salt", id: "vagrant-root"
+  config.vm.network "forwarded_port", guest: 80, host: 8080
 
   config.ssh.forward_agent = true
 
@@ -20,17 +21,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.cache.scope = :box
   end
 
-  # Clone any desired formula repos, if available
-  if File.exist?('./.vagrant-salt/deps.rb')
-    Dir.chdir('./.vagrant-salt') do
-      system('./deps.rb')
-    end
+  config.vm.provision :saltdeps do |deps|
+    deps.checkout_path =  "./.vagrant-salt/deps"
+    deps.deps_path     =  "./.vagrant-salt/saltdeps.yml"
   end
 
   # Provision VM with current formula, in masterless mode
   config.vm.provision :salt do |salt|
     salt.minion_config = "./.vagrant-salt/minion"
-    salt.grains_config = "./.vagrant-salt/grains"
     salt.run_highstate = true
     salt.install_type = 'stable'
     salt.colorize = true
