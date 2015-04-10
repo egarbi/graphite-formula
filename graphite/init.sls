@@ -161,6 +161,8 @@ carbon-cache-{{ loop.index }}:
     - enable: True
     - watch:
       - file: {{ graphite.install_path }}/conf/carbon.conf
+      - file: {{ graphite.install_path }}/conf/storage-schemas.conf
+      - file: {{ graphite.install_path }}/conf/storage-aggregation.conf
     - require:
       - file: /etc/init.d/carbon-cache-{{ loop.index }}
       - file: {{ graphite.install_path }}/conf/storage-schemas.conf
