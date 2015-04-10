@@ -164,6 +164,7 @@ carbon-cache-{{ loop.index }}:
     - require:
       - file: /etc/init.d/carbon-cache-{{ loop.index }}
       - file: {{ graphite.install_path }}/conf/storage-schemas.conf
+      - file: {{ graphite.install_path }}/conf/storage-aggregation.conf
       - file: {{ graphite.install_path }}/conf/carbon.conf
 {% endfor %}
 
@@ -192,5 +193,6 @@ carbon-relay-{{ loop.index }}:
     - require:
       - file: /etc/init.d/carbon-relay-{{ loop.index }}
       - file: {{ graphite.install_path }}/conf/storage-schemas.conf
+      - file: {{ graphite.install_path }}/conf/storage-aggregation.conf
       - file: {{ graphite.install_path }}/conf/carbon.conf
 {% endfor %}
