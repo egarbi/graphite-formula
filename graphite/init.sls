@@ -62,25 +62,9 @@ graphite_dependencies:
     - contents_grains: graphite:config:storage_schemas
 {% endif %}
 
-{{ graphite.install_path }}/conf/storage-aggregation.conf:
-  file.absent
-{% if salt['grains.get']('graphite:config:storage_aggregation','None') == 'None' %}
-{{ graphite.install_path }}/conf/storage-aggregation.conf:
-  file.managed:
-    - source: salt://graphite/files/storage-aggregation.conf
-    - user: root
-    - group: root
-    - mode: 755
-    - makedirs: True
-{% else %}
-{{ graphite.install_path }}/conf/storage-aggregation.conf:
-  file.managed:
-    - user: root
-    - group: root
-    - mode: 755
-    - makedirs: True
-    - contents_grains: graphite:config:storage_aggregation
-{% endif %}
+remove_file:
+  file.absent:
+    - name: {{ graphite.install_path }}/conf/storage-aggregation.conf
 
 {{ graphite.install_path }}/conf/carbon.conf:
   file.managed:
@@ -164,11 +148,11 @@ carbon-cache-{{ loop.index }}:
     - watch:
       - file: {{ graphite.install_path }}/conf/carbon.conf
       - file: {{ graphite.install_path }}/conf/storage-schemas.conf
-      - file: {{ graphite.install_path }}/conf/storage-aggregation.conf
+      - file: remove_file
     - require:
       - file: /etc/init.d/carbon-cache-{{ loop.index }}
       - file: {{ graphite.install_path }}/conf/storage-schemas.conf
-      - file: {{ graphite.install_path }}/conf/storage-aggregation.conf
+      - file: remove_file
       - file: {{ graphite.install_path }}/conf/carbon.conf
 {% endfor %}
 
@@ -197,6 +181,6 @@ carbon-relay-{{ loop.index }}:
     - require:
       - file: /etc/init.d/carbon-relay-{{ loop.index }}
       - file: {{ graphite.install_path }}/conf/storage-schemas.conf
-      - file: {{ graphite.install_path }}/conf/storage-aggregation.conf
+      - file: remove_file
       - file: {{ graphite.install_path }}/conf/carbon.conf
 {% endfor %}
