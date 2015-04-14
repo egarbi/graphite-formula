@@ -212,7 +212,7 @@ CARBONLINK_TIMEOUT = 1.0
 # Using 'query-bulk' queries for carbon
 # It's more effective, but python-carbon 0.9.13 (or latest from 0.9.x branch) is required
 # See https://github.com/graphite-project/carbon/pull/132 for details
-CARBONLINK_QUERY_BULK = False
+CARBONLINK_QUERY_BULK = True
 
 #####################################
 # Additional Django Settings #
