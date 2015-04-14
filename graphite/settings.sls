@@ -6,7 +6,7 @@
 {%- set default_cache = {} %}
 {%- set default_relay = {} %}
 {%- set force_mine_update = salt['mine.send']('network.ip_addrs') %}
-
+{%- set local_ip = salt['network.ip_addrs']()[0] %}
 {%- set cluster_name = salt['grains.get']('graphite:cluster_name') %}
 {%- set graphite_host_dict = salt['mine.get']('G@roles:graphite and G@graphite:cluster_name:' + cluster_name + '', 'network.ip_addrs', 'compound') %}
 {%- set graphite_ids = graphite_host_dict.keys() %}
@@ -14,7 +14,9 @@
 {%- set destinations = [] %}
 {%- set cluster_servers = [] %}
 {%- for ip_addr in graphite_hosts %}
-  {{ cluster_servers.append('"' + ip_addr[0] + ':80' + '"') }}
+  {%- if ip_addr[0] != local_ip %}
+    {{ cluster_servers.append('"' + ip_addr[0] + ':80' + '"') }}
+  {% endif %}
   {%- if 'relays' in gc %}
     {%- set num_of_relays = gc.get('relays',[])|length + 1 %}
     {{ destinations.append(ip_addr[0]+':210%s:1'|format(num_of_relays)) }}

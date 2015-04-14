@@ -170,7 +170,8 @@ INDEX_FILE = '{{ graphite.install_path }}/storage/index'  # Search index file
 # remote server in the cluster. These servers must each have local access to
 # metric data. Note that the first server to return a match for a query will be
 # used.
-CLUSTER_SERVERS = [{{ graphite.cluster_servers|join(', ') }}]
+{% set cluster_servers = graphite.cluster_servers %}
+CLUSTER_SERVERS = [{{ cluster_servers|join(', ') }}]
 
 ## These are timeout values (in seconds) for requests to remote webapps
 REMOTE_STORE_FETCH_TIMEOUT = 6   # Timeout to fetch series data
@@ -192,14 +193,14 @@ REMOTE_RENDERING = True
 # List of IP (and optionally port) of the webapp on each remote server that
 # will be used for rendering. Note that each rendering host should have local
 # access to metric data or should have CLUSTER_SERVERS configured
-RENDERING_HOSTS = []
+RENDERING_HOSTS = [{{ cluster_servers|join(', ') }}]
 REMOTE_RENDER_CONNECT_TIMEOUT = 1.0
 
 # If you are running multiple carbon-caches on this machine (typically behind a relay using
 # consistent hashing), you'll need to list the ip address, cache query port, and instance name of each carbon-cache
 # instance on the local machine (NOT every carbon-cache in the entire cluster). The default cache query port is 7002
 # and a common scheme is to use 7102 for instance b, 7202 for instance c, etc.
-#
+# NETWORK_IP = {{ salt['network.ip_addrs']()[0] }}
 # You *should* use 127.0.0.1 here in most cases
 {%- set carbonlink_hosts = [] %}
 {%- for cache in graphite.caches %}
