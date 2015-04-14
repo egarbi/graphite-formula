@@ -62,8 +62,6 @@ graphite_dependencies:
     - contents_grains: graphite:config:storage_schemas
 {% endif %}
 
-{{ graphite.install_path }}/conf/storage-aggregation.conf:
-  file.absent
 {% if salt['grains.get']('graphite:config:storage_aggregation','None') == 'None' %}
 {{ graphite.install_path }}/conf/storage-aggregation.conf:
   file.managed:
