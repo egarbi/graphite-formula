@@ -24,12 +24,19 @@ dependent_packages:
       - python-django-tagging
       - python-memcache
       - python-rrdtool
+      - libldap2-dev
+      - libsasl2-dev
+      - libssl-dev
     - require:
       - pkg: apache2
     - require_in:
       - cmd: init_db
     - require_in:
       - file: /etc/apache2/sites-enabled/graphite-web.conf
+      - pip: python-ldap
+
+python-ldap:
+  pip.installed
 
 graphite-web:
   pip.installed:

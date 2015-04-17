@@ -99,22 +99,26 @@ INDEX_FILE = '{{ graphite.install_path }}/storage/index'  # Search index file
 # Authentication Configuration #
 #####################################
 ## LDAP / ActiveDirectory authentication setup
+# LDAP / ActiveDirectory authentication setup
+# NOTE FROM JOE HUGHES... THE FOLLOWING SETTINGS WILL ENABLE LDAP
 #USE_LDAP_AUTH = True
-#LDAP_SERVER = "ldap.mycompany.com"
-#LDAP_PORT = 389
-#	OR
-#LDAP_URI = "ldaps://ldap.mycompany.com:636"
-#LDAP_SEARCH_BASE = "OU=users,DC=mycompany,DC=com"
-#LDAP_BASE_USER = "CN=some_readonly_account,DC=mycompany,DC=com"
-#LDAP_BASE_PASS = "readonly_account_password"
-#LDAP_USER_QUERY = "(username=%s)"  #For Active Directory use "(sAMAccountName=%s)"
+#LDAP_URI = "ldap://inf-ldap-ldap-01-76936904.us-east-1.elb.amazonaws.com:1389"
+
+#LDAP_SEARCH_BASE = "ou=users,dc=aetnaidp,dc=local"
+#LDAP_BASE_USER = "cn=service-jenkins-ro,ou=users,dc=aetnaidp,dc=local"
+#LDAP_BASE_PASS = ""
+#LDAP_USER_QUERY = "(uid=%s)"  #For Active Directory use "(sAMAccountName=%s)"
+
+
+#For Active Directory use "(sAMAccountName=%s)"
 #
 # If you want to further customize the ldap connection options you should
 # directly use ldap.set_option to set the ldap module's global options.
 # For example:
 #
+# NOTE FROM JOE HUGHES: TO ENABLE LDAP OUT MUST ENABLE THE NEXT TWO LINES
 #import ldap
-#ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
+#ldap.set_option(ldap.OPT_X_TLS_DEMAND, True)
 #ldap.set_option(ldap.OPT_X_TLS_CACERTDIR, "/etc/ssl/ca")
 #ldap.set_option(ldap.OPT_X_TLS_CERTFILE, "/etc/ssl/mycert.pem")
 #ldap.set_option(ldap.OPT_X_TLS_KEYFILE, "/etc/ssl/mykey.pem")

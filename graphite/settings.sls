@@ -68,5 +68,6 @@
   'carbon_version'  : pc.get('carbon_version', '0.9.13'),
   'web_version'     : pc.get('web_version', '0.9.13'),
   'install_path'    : gc.get('install_path', '/data/graphite'),
+  'web_port'        : pc.get('web_port', 80),
   'cluster_servers' : cluster_servers
 }) %}
