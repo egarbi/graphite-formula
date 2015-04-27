@@ -1,4 +1,4 @@
 name: graphite
 deps:
   git:
-    git: ssh://git@stash.itriagehealth.com/salt/git-formula.git
+    git: git@github.com:joshughes/git-formula.git
