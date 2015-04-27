@@ -219,8 +219,7 @@ directory on the VM - the main SaltStack formula tree directory.
 In the .vagrant-salt/ directory there are a few files that help with local
 Vagrant testing. These files are:
 
-* deps.rb - a Ruby tool to handle Salt formula dependency management.
-* deps.yml - a YAML file which is used by deps.rb to determine the formula dependencies.
+* saltdeps.yml - a YAML file which is used by deps.rb to determine the formula dependencies.
 * grains - a YAML Salt grains file for setting up the VM with grains for testing.
 * minion - a Salt minion configuration file to set up the minion's settings.
 * top.sls - a base Salt top.sls file for describing which formulas to apply on the test VM.
